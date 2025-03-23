@@ -16,6 +16,7 @@ class Dice(commands.Cog):
         if not match:
             return
         
+        print("received message")
         rolls, sides, operator, number = match.groups()
         rolls, sides = int(rolls), int(sides)
         if rolls <=0 or sides <= 0:
