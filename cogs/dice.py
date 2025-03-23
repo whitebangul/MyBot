@@ -45,5 +45,5 @@ class Dice(commands.Cog):
             f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} (굴림: {rolled_str})"
         )
 
-def setup(bot):
-    bot.add_cog(Dice(bot))
+async def setup(bot):
+    await bot.add_cog(Dice(bot))
