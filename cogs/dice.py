@@ -36,7 +36,7 @@ class Dice(commands.Cog):
                 elif operator == '*':
                     total *= number
                 elif operator == '/':
-                    total = round(total, number) if number != 0 else 0
+                    total = round(total / number) if number != 0 else 0
 
             rolled_str = ", ".join(str(r) for r in results)
             op_str = f" {operator} {number}" if operator and number else ""
