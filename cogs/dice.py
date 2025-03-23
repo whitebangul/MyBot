@@ -13,7 +13,7 @@ class Dice(commands.Cog):
             return
         
         content = message.content.lower().replace(" ", "")
-        match = re.match(r"(\d+)d(\d+)([+\-*/])?(\d+)?", content)
+        match = re.match(r"^(\d+)d(\d+)([+\-*/])\s*(\d+)?", content)
         if match:
         
             #print("received message")
