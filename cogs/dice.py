@@ -12,12 +12,12 @@ class Dice(commands.Cog):
         if message.author == self.bot.user:
             return
         
-        content = message.content.lower().replace(" ", "")
+        content = message.content.lower()
         match = re.match(r"^(\d+)d(\d+)(?:\s*([+\-*/])\s*(\d+))?(?:\s+(.*))?", content)
         if match:
         
             print("received message")
-            rolls, sides, operator, number = match.groups()
+            rolls, sides, operator, number, note = match.groups()
             rolls, sides = int(rolls), int(sides)
             print(f"Operator: {operator}, Number: {number}")
             if rolls <=0 or sides <= 0:
@@ -40,9 +40,10 @@ class Dice(commands.Cog):
 
             rolled_str = ", ".join(str(r) for r in results)
             op_str = f" {operator} {number}" if operator and number else ""
+            note_str = f"{note.strip()}\n" if note else ""
 
             await message.reply(
-                f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} `(굴림: {rolled_str})`"
+                f"{note_str}🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} `(굴림: {rolled_str})`"
             )
             return
         await self.bot.process_commands(message)
