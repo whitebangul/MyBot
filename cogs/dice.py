@@ -40,7 +40,7 @@ class Dice(commands.Cog):
             rolled_str = ", ".join(str(r) for r in results)
             op_str = f" {operator} {number}" if operator and number else ""
 
-            await message.channel.send(
+            await message.reply(
                 f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} `(굴림: {rolled_str})`"
             )
             return
