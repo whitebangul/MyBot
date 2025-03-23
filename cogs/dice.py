@@ -41,7 +41,7 @@ class Dice(commands.Cog):
             op_str = f" {operator} {number}" if operator and number else ""
 
             await message.channel.send(
-                f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} \`(굴림: {rolled_str})\`"
+                f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} `(굴림: {rolled_str})`"
             )
             return
         await self.bot.process_commands(message)

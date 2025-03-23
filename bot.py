@@ -3,23 +3,27 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import os
 
-# load .env
+# Load environment variables
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
-# intents
+# Intents: required to read message content
 intents = discord.Intents.default()
 intents.message_content = True
 
+# Define your custom bot class
 class MyBot(commands.Bot):
     async def setup_hook(self):
-       await self.load_extension("cogs.dice")
+        # Load your dice cog
+        await self.load_extension("cogs.dice")
 
+# Create an instance of the bot using your custom class
 bot = MyBot(command_prefix="-", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    print(f"✅ Logged in as {bot.user}")
     await bot.change_presence(activity=discord.Game(name=""))
 
+# Run the bot
 bot.run(TOKEN)
