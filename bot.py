@@ -15,7 +15,7 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
        await self.load_extension("cogs.dice")
 
-bot = commands.Bot(command_prefix="-", intents=intents)
+bot = MyBot(command_prefix="-", intents=intents)
 
 @bot.event
 async def on_ready():
