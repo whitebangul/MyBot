@@ -8,7 +8,7 @@ class Dice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        #print(f"[DEBUG] Received message: {message.content}")
+        print(f"[DEBUG] Received message: {message.content}")
         if message.author == self.bot.user:
             return
         
@@ -16,9 +16,10 @@ class Dice(commands.Cog):
         match = re.match(r"^(\d+)d(\d+)(?:\s*([+\-*/])\s*(\d+))?(?:\s+(.*))?", content)
         if match:
         
-            #print("received message")
+            print("received message")
             rolls, sides, operator, number = match.groups()
             rolls, sides = int(rolls), int(sides)
+            print(f"Operator: {operator}, Number: {number}")
             if rolls <=0 or sides <= 0:
                 return
             
