@@ -8,42 +8,43 @@ class Dice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        print(f"[DEBUG] Received message: {message.content}")
+        #print(f"[DEBUG] Received message: {message.content}")
         if message.author == self.bot.user:
             return
         
         content = message.content.lower().replace(" ", "")
         match = re.fullmatch(r"(\d+)d(\d+)([+\-*/])?(\d+)?", content)
-        if not match:
-            return
+        if match:
         
-        print("received message")
-        rolls, sides, operator, number = match.groups()
-        rolls, sides = int(rolls), int(sides)
-        if rolls <=0 or sides <= 0:
+            #print("received message")
+            rolls, sides, operator, number = match.groups()
+            rolls, sides = int(rolls), int(sides)
+            if rolls <=0 or sides <= 0:
+                return
+            
+            results = [random.randint(1, sides) for _ in range(rolls)]
+            total = sum(results)
+            raw_total = total
+
+            if operator and number:
+                number = int(number)
+                if operator == '+':
+                    total += number
+                elif operator == '-':
+                    total -= number
+                elif operator == '*':
+                    total *= number
+                elif operator == '/':
+                    total = round(total, number, 2) if number != 0 else 0
+
+            rolled_str = ", ".join(str(r) for r in results)
+            op_str = f" {operator} {number}" if operator and number else ""
+
+            await message.channel.send(
+                f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} \`(굴림: {rolled_str})\`"
+            )
             return
-        
-        results = [random.randint(1, sides) for _ in range(rolls)]
-        total = sum(results)
-        raw_total = total
-
-        if operator and number:
-            number = int(number)
-            if operator == '+':
-                total += number
-            elif operator == '-':
-                total -= number
-            elif operator == '*':
-                total *= number
-            elif operator == '/':
-                total = round(total, number, 2) if number != 0 else 0
-
-        rolled_str = ", ".join(str(r) for r in results)
-        op_str = f" {operator} {number}" if operator and number else ""
-
-        await message.channel.send(
-            f"🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} \`(굴림: {rolled_str})\`"
-        )
+        await self.bot.process_commands(message)
 
 async def setup(bot):
     await bot.add_cog(Dice(bot))
