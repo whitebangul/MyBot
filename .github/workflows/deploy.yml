@@ -21,6 +21,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/MyBot
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
             screen -S discordbot -X quit || true
             screen -dmS discordbot python3 bot.py
