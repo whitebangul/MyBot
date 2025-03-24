@@ -65,6 +65,7 @@ class Poker(commands.Cog):
             "\n"
             "게임 중 도움이 필요하면 언제든 `-poker rules`를 입력하세요!"
         )
+        await ctx.send(rules_text)
     
     @commands.command()
     async def poker(self, ctx, action: str):
