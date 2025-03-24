@@ -42,6 +42,10 @@ class Poker(commands.Cog):
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
+    @commands.command()
+    async def poker(self, ctx, action: str):
+        print(f"[DEBUG] poker() called with action: {action}")
+    
     @commands.command(name="poker_rules")
     async def poker_rules(self, ctx):
         rules_text = (
