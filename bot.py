@@ -16,6 +16,7 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         # Load your dice cog
         await self.load_extension("cogs.dice")
+        await self.load_extension("cogs.poker")
 
 # Create an instance of the bot using your custom class
 bot = MyBot(command_prefix="-", intents=intents)

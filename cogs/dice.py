@@ -8,7 +8,7 @@ class Dice(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        print(f"[DEBUG] Received message: {message.content}")
+        #print(f"[DEBUG] Received message: {message.content}")
         if message.author == self.bot.user:
             return
         
@@ -16,10 +16,10 @@ class Dice(commands.Cog):
         match = re.match(r"^(\d+)d(\d+)(?:\s*([+\-*/])\s*(\d+))?(?:\s+(.*))?", content)
         if match:
         
-            print("received message")
+            #print("received message")
             rolls, sides, operator, number, note = match.groups()
             rolls, sides = int(rolls), int(sides)
-            print(f"Operator: {operator}, Number: {number}")
+            #print(f"Operator: {operator}, Number: {number}")
             if rolls <=0 or sides <= 0:
                 return
             
@@ -43,7 +43,7 @@ class Dice(commands.Cog):
             note_str = f"{note.strip()}\n" if note else ""
 
             await message.reply(
-                f"{note_str}🎲 주사위: {rolls}d{sides}{op_str} 결과: {total} `(굴림: {rolled_str})`"
+                f"{note_str}🎲 주사위: {rolls}d{sides}{op_str} | 결과: {total} `(굴림: {rolled_str})`"
             )
             return
         await self.bot.process_commands(message)
