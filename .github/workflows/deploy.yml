@@ -23,5 +23,8 @@ jobs:
             cd ~/MyBot
             git fetch origin
             git reset --hard origin/main
+            pkill -f bot.py || true
             screen -S discordbot -X quit || true
+            cd ~/MyBot
+            git pull origin main
             screen -dmS discordbot python3 bot.py
