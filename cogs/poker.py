@@ -45,6 +45,7 @@ class Poker(commands.Cog):
     
     @commands.command(name="rules")
     async def poker_rules(self, ctx):
+        print(f"📢 poker_rules triggered by {ctx.author} in {ctx.channel}")
         rules_text = (
             "**텍사스 홀덤 게임 설명**\n"
             "\n"
@@ -61,8 +62,6 @@ class Poker(commands.Cog):
             "\n"
             "**카드 조합 예시 (강한 순):**\n"
             "로열 플러시 > 스트레이트 플러시 > 포카드 > 풀하우스 > 플러시 > 스트레이트 > 트리플 > 투페어 > 원페어 > 하이카드\n"
-            "\n"
-            "이후에는 베팅, 폴드 등의 기능이 추가될 예정입니다.\n"
             "\n"
             "게임 중 도움이 필요하면 언제든 `-poker rules`를 입력하세요!"
         )
