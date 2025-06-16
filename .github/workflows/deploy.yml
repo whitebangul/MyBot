@@ -23,8 +23,11 @@ jobs:
             cd ~/MyBot
             git fetch origin
             git reset --hard origin/main
+
+            # Kill the bot if it's running
             pkill -f bot.py || true
+            sleep 2  # give time to fully stop
             screen -S discordbot -X quit || true
-            cd ~/MyBot
-            git pull origin main
-            screen -dmS discordbot python3 bot.py
+
+            # Start fresh
+            screen -dmS discordbot bash -c 'cd ~/MyBot && python3 bot.py'
