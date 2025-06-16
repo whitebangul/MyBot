@@ -72,9 +72,9 @@ class Poker(commands.Cog):
         channel_id = ctx.channel.id
 
         if action == 'start':
-            # if channel_id in self.games:
+            if channel_id in self.games:
             #     await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
-            #     return
+                return
             
             self.games[channel_id] = PokerGame()
             await ctx.send("게임이 시작되었습니다! `-poker join`으로 참가하세요.")
