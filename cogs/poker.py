@@ -42,10 +42,6 @@ class Poker(commands.Cog):
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
-    @commands.command()
-    async def poker(self, ctx, action: str):
-        print(f"[DEBUG] poker() called with action: {action}")
-    
     @commands.command(name="poker_rules")
     async def poker_rules(self, ctx):
         rules_text = (
@@ -105,7 +101,7 @@ class Poker(commands.Cog):
             for player_id, cards in game.players.items():
                 user = await self.bot.fetch_user(player_id)
                 try:
-                    await user.send(f"당신의 카드: {cards[0], {cards[1]}}")
+                    await user.send(f"당신의 카드: {cards[0]}, {cards[1]}")
                 except:
                     await ctx.send(f"{user.name} 님에게 DM을 보낼 수 없습니다.")
             await ctx.send("카드가 배분되었습니다! `-poker flop`, `turn`, `river` 명령어로 커뮤니티 카드를 공개하세요.")
