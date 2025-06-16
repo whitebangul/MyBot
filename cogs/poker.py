@@ -135,6 +135,15 @@ class Poker(commands.Cog):
 
             await ctx.send("🪙 게임이 종료되었습니다. 참여해 주셔서 감사합니다!")
             del self.games[channel_id]  # Clean up
+        
+        elif action == "end":
+            game = self.games.get(channel_id)
+            if not game:
+                return await ctx.send("진행 중인 게임이 없습니다.")
+            
+            del self.games[channel_id]
+            await ctx.send(f"<@{ctx.author.id}> 님의 요청으로 게임이 종료되었습니다.")
+
 
         else:
             await ctx.send("알 수 없는 명령어입니다. 사용 가능한 명령어: `start`, `join`, `deal`, `flop`, `turn`, `river`")
