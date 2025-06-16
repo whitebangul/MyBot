@@ -42,7 +42,7 @@ class Poker(commands.Cog):
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
-    @commands.command(name="poker_rules")
+    @commands.command(name="rules")
     async def poker_rules(self, ctx):
         rules_text = (
             "**텍사스 홀덤 게임 설명**\n"
