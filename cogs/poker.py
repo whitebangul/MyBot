@@ -43,7 +43,7 @@ class Poker(commands.Cog):
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
-    @commands.command(name="rules")
+    @commands.command(name="poker_rules")
     async def poker_rules(self, ctx):
         print(f"📢 poker_rules triggered by {ctx.author} in {ctx.channel}")
         rules_text = (
@@ -63,7 +63,7 @@ class Poker(commands.Cog):
             "**카드 조합 예시 (강한 순):**\n"
             "로열 플러시 > 스트레이트 플러시 > 포카드 > 풀하우스 > 플러시 > 스트레이트 > 트리플 > 투페어 > 원페어 > 하이카드\n"
             "\n"
-            "게임 중 도움이 필요하면 언제든 `-poker rules`를 입력하세요!"
+            "게임 중 도움이 필요하면 언제든 `-poker_rules`를 입력하세요!"
         )
         await ctx.send(rules_text)
     
@@ -73,7 +73,7 @@ class Poker(commands.Cog):
 
         if action == 'start':
             if channel_id in self.games:
-            #     await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
+                await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
                 return
             
             self.games[channel_id] = PokerGame()
