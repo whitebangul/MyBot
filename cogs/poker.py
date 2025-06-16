@@ -67,14 +67,14 @@ class Poker(commands.Cog):
         )
         await ctx.send(rules_text)
     
-    @commands.command()
-    async def poker(self, ctx, action: str):
+    @commands.command(name="poker_game")
+    async def poker_main(self, ctx, action: str):
         channel_id = ctx.channel.id
 
         if action == 'start':
-            if channel_id in self.games:
-                await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
-                return
+            # if channel_id in self.games:
+            #     await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
+            #     return
             
             self.games[channel_id] = PokerGame()
             await ctx.send("게임이 시작되었습니다! `-poker join`으로 참가하세요.")
