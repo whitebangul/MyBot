@@ -46,7 +46,6 @@ class Dice(commands.Cog):
                 f"{note_str}🎲 주사위: {rolls}d{sides}{op_str} | 결과: {total} `(굴림: {rolled_str})`"
             )
             return
-        await self.bot.process_commands(message)
 
 async def setup(bot):
     await bot.add_cog(Dice(bot))
