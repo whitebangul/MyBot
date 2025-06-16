@@ -80,12 +80,14 @@ class Poker(commands.Cog):
             await ctx.send("게임이 시작되었습니다! `-poker join`으로 참가하세요.")
 
         elif action == 'join':
+            member = ctx.guild.get_member(ctx.author.id)
+            display_name = member.display_name if member else ctx.author.name
             game = self.games.get(channel_id)
             if not game:
                 return await ctx.send("게임이 아직 시작되지 않았습니다. `-poker start`를 먼저 입력하세요.")
             added = game.add_player(ctx.author)
             if added:
-                await ctx.send(f"{ctx.author.display_name} 님이 게임에 참가했습니다.")
+                await ctx.send(f"{display_name} 님이 게임에 참가했습니다.")
             else:
                 await ctx.send("이미 참가중이거나 게임이 시작되었습니다.")
 
