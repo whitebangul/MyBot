@@ -39,6 +39,7 @@ class PokerGame:
 
 class Poker(commands.Cog):
     def __init__(self, bot):
+        print(f"⚠️ Poker Cog Loaded - ID: {id(self)}")
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
