@@ -67,7 +67,7 @@ class Poker(commands.Cog):
         )
         await ctx.send(rules_text)
     
-    @commands.command(name="poker_game")
+    @commands.command(name="poker")
     async def poker_main(self, ctx, action: str):
         channel_id = ctx.channel.id
 
