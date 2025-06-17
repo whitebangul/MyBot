@@ -66,16 +66,35 @@ class Store(commands.Cog):
         await ctx.send(f"{item_name}의 재고가 {amt}개 추가되었습니다.")
 
     @commands.command(name="코인")
-    async def adjust_coins(self, ctx, member: discord.Member, amt: int):
+    async def change_coins(self, ctx, arg1=None, arg2=None):
         coins = load_json(COIN_FILE)
-        user_id = str(member.id)
 
-        coins[user_id] = coins.get(user_id, 0) + amt
-        save_json(COIN_FILE, coins)
-        if amt >= 0:
-            await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
-        else:
-            await ctx.send(f"{member.mention}님의 잔액에서 {amt} 코인이 차감되었습니다.")
+        # case 1: "-코인 amt" --> give coins to the command user
+        if arg1 and arg1.isdigit():
+            amt = int(arg1)
+            user_id = str(ctx.author.id)
+            coins[user_id] = coins.get(user_id, 0) + amt
+            save_json(COIN_FILE, coins)
+            if amt >= 0:
+                await ctx.send(f"<@{user_id}>님의 잔액에 {amt} 코인이 추가되었습니다.")
+            else:
+                await ctx.send(f"<@{user_id}>님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
+
+        # case 2: "-코인 @user amt"
+        if arg1 and arg2 and arg2.isdigit():
+            if len(ctx.message.mentions) == 0:
+                return await ctx.send("유효하지 않은 명령어입니다.")
+            member = ctx.message.mentions[0]
+            amt = int(arg2)
+            user_id = str(member.id)
+            coins[user_id] = coins.get(user_id, 0) + amt
+            save_json(COIN_FILE, coins)
+            if amt >= 0:
+                await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
+            else:
+                await ctx.send(f"{member.mention}님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
+        # Handle error
+        await ctx.send("사용법: `-코인 @대상 10` 또는 `-코인 10`")
 
     @commands.command(name="암거래")
     async def list_items(self, ctx):
