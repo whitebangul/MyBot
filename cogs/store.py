@@ -31,7 +31,7 @@ class Store(commands.Cog):
     async def buy(self, ctx, item_name: str):
         coins = load_json(COIN_FILE)
         items = load_json(ITEM_FILE)
-        user_id = str(ctx.user.id)
+        user_id = str(ctx.author.id)
 
         if item_name not in items:
             return await ctx.send("해당 상품이 존재하지 않습니다.")
