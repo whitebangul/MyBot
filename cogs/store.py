@@ -76,12 +76,12 @@ class Store(commands.Cog):
             coins[user_id] = coins.get(user_id, 0) + amt
             save_json(COIN_FILE, coins)
             if amt >= 0:
-                await ctx.send(f"<@{user_id}>님의 잔액에 {amt} 코인이 추가되었습니다.")
+                return await ctx.send(f"<@{user_id}>님의 잔액에 {amt} 코인이 추가되었습니다.")
             else:
-                await ctx.send(f"<@{user_id}>님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
+                return await ctx.send(f"<@{user_id}>님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
 
         # case 2: "-코인 @user amt"
-        if arg1 and arg2 and arg2.isdigit():
+        elif arg1 and arg2 and arg2.isdigit():
             if len(ctx.message.mentions) == 0:
                 return await ctx.send("유효하지 않은 명령어입니다.")
             member = ctx.message.mentions[0]
@@ -90,12 +90,11 @@ class Store(commands.Cog):
             coins[user_id] = coins.get(user_id, 0) + amt
             save_json(COIN_FILE, coins)
             if amt >= 0:
-                await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
+                return await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
             else:
-                await ctx.send(f"{member.mention}님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
-        # Handle error
-        else:
-            await ctx.send("사용법: `-코인 @대상 10` 또는 `-코인 10`")
+                return await ctx.send(f"{member.mention}님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
+
+        await ctx.send("사용법: `-코인 @대상 10` 또는 `-코인 10`")
 
     @commands.command(name="암거래")
     async def list_items(self, ctx):
