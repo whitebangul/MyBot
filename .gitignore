@@ -1,1 +1,12 @@
+# Ignore user coin data
+data/coins.json
+
+# Ignore store inventory data
+data/inventory.json
+
+# (optional) Ignore Python cache files
+__pycache__/
+*.pyc
+
+# (optional) Ignore your environment file if present
 .env
