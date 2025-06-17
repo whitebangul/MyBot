@@ -65,15 +65,17 @@ class Store(commands.Cog):
         save_json(ITEM_FILE, items)
         await ctx.send(f"{item_name}의 재고가 {amt}개 추가되었습니다.")
 
-    @commands.command(name="add")
-    async def add_coins(self, ctx, member: discord.Member, amt: int):
+    @commands.command(name="코인")
+    async def adjust_coins(self, ctx, member: discord.Member, amt: int):
         coins = load_json(COIN_FILE)
         user_id = str(member.id)
 
         coins[user_id] = coins.get(user_id, 0) + amt
         save_json(COIN_FILE, coins)
-
-        await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
+        if amt >= 0:
+            await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
+        else:
+            await ctx.send(f"{member.mention}님의 잔액에서 {amt} 코인이 차감되었습니다.")
 
     @commands.command(name="암거래")
     async def list_items(self, ctx):
