@@ -94,7 +94,8 @@ class Store(commands.Cog):
             else:
                 await ctx.send(f"{member.mention}님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
         # Handle error
-        await ctx.send("사용법: `-코인 @대상 10` 또는 `-코인 10`")
+        else:
+            await ctx.send("사용법: `-코인 @대상 10` 또는 `-코인 10`")
 
     @commands.command(name="암거래")
     async def list_items(self, ctx):
