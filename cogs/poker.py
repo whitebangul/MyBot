@@ -77,7 +77,6 @@ class Poker(commands.Cog):
         )
         try:
             await ctx.author.send(rules_text)
-            await ctx.send("📬 규칙을 DM으로 보냈습니다!")
         except discord.Forbidden:
             await ctx.send("❌ DM을 보낼 수 없습니다. DM을 허용해주세요.")
     
