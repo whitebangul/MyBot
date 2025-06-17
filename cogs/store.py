@@ -24,8 +24,14 @@ class Store(commands.Cog):
     @commands.command(name="잔액")
     async def balance(self, ctx):
         coins = load_json(COIN_FILE)
-        bal = coins.get(str(ctx.author.id), 0)
-        await ctx.send(f"<@{ctx.author.id}> 님의 현재 잔액은 {bal} 코인입니다.")
+        user_id = str(ctx.author.id)
+
+        if user_id not in coins:
+            coins[user_id] = 0
+            save_json(COIN_FILE, coins)
+
+        bal = coins[user_id]
+        await ctx.send(f"<@{user_id}> 님의 현재 잔액은 {bal} 코인입니다.")
     
     @commands.command(name="구매")
     async def buy(self, ctx, item_name: str):
