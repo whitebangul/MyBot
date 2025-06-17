@@ -84,6 +84,8 @@ class Store(commands.Cog):
             amt = int(arg1)
             user_id = str(ctx.author.id)
             coins[user_id] = coins.get(user_id, 0) + amt
+            if coins[user_id] < 0:
+                coins[user_id] = 0
             save_json(COIN_FILE, coins)
             if amt >= 0:
                 return await ctx.send(f"<@{user_id}>님의 잔액에 {amt} 코인이 추가되었습니다.")
@@ -96,6 +98,8 @@ class Store(commands.Cog):
             amt = int(arg2)
             user_id = str(member.id)
             coins[user_id] = coins.get(user_id, 0) + amt
+            if coins[user_id] < 0:
+                coins[user_id] = 0
             save_json(COIN_FILE, coins)
             if amt >= 0:
                 return await ctx.send(f"{member.mention}님의 잔액에 {amt} 코인이 추가되었습니다.")
@@ -115,7 +119,7 @@ class Store(commands.Cog):
         for item, data in items.items():
             price = data["price"]
             stock = data["stock"]
-            msg_lines.append(f"* **{item}** - {price} 코인 (재고: {stock})")
+            msg_lines.append(f"* **{item}** - {price} 코인 `(재고: {stock})`")
         await ctx.send("\n".join(msg_lines))
 
 async def setup(bot):

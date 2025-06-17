@@ -144,7 +144,7 @@ class Poker(commands.Cog):
             if len(game.community_cards) >= 4:
                 return await ctx.send("턴은 이미 공개되었습니다.")
             game.turn()
-            cards = game.community_cards[:-1] + [f"**{game.community_cards[-1]}**"]
+            cards = game.community_cards[:-1] + [f"***{game.community_cards[-1]}***"]
             await ctx.send(f"공유 카드: {' | '.join(cards)}")
 
 
@@ -155,7 +155,7 @@ class Poker(commands.Cog):
             if len(game.community_cards) == 5:
                 return await ctx.send("리버는 이미 공개되었습니다.")
             game.river()
-            cards = game.community_cards[:-1] + [f"**{game.community_cards[-1]}**"]
+            cards = game.community_cards[:-1] + [f"***{game.community_cards[-1]}***"]
             await ctx.send(f"🃏 공유 카드: {' | '.join(cards)}")
 
             await ctx.send("🪙 모든 공유 카드가 공개되었습니다.")
