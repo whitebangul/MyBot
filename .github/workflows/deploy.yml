@@ -12,10 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Debug EC2 Host
-        run: echo "Host is ${{ secrets.EC2_HOST }}"
 
-      - name: Deploy to EC2 via SSH
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -24,8 +22,18 @@ jobs:
           script: |
             echo "📦 Pulling latest code..."
             cd ~/MyBot
+
+            echo "💾 Saving coin/store data..."
+            cp data/coins.json ~/coins.json.bak || true
+            cp data/inventory.json ~/inventory.json.bak || true
+
+            echo "🌀 Fetching latest code..."
             git fetch origin
             git reset --hard origin/main
+
+            echo "🔁 Restoring coin/store data..."
+            cp ~/coins.json.bak data/coins.json || true
+            cp ~/inventory.json.bak data/inventory.json || true
 
             echo "🛑 Stopping old bot if it exists..."
             pkill -f bot.py || true
