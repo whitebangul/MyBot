@@ -13,21 +13,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "📦 Pulling latest code..."
             cd ~/MyBot
             git fetch origin
             git reset --hard origin/main
 
-            # Kill the bot if it's running
+            echo "🛑 Stopping old bot if it exists..."
             pkill -f bot.py || true
-            sleep 2  # give time to fully stop
             screen -S discordbot -X quit || true
+            sleep 2
 
-            # Start fresh
+            echo "🚀 Starting new bot process..."
             screen -dmS discordbot bash -c 'cd ~/MyBot && python3 bot.py'
+
+            echo "✅ Deployment completed successfully."
