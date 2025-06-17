@@ -66,7 +66,7 @@ class Poker(commands.Cog):
             "1. 모든 플레이어에게 개인 카드 2장이 주어집니다. (deal)\n"
             "2. 플레이어들은 카드 조합을 보고 베팅 여부를 정합니다. 각 플레이어들은 베팅, 레이즈, 콜, 폴드를 할 수 있습니다.\n"
             "3. 모두가 동의했다면 공유 카드 3장을 공개합니다. (flop)\n"
-            "4. 플레이어들은 개인 카드 2장과 공유 카드를 조합해 높은 족보를 만들어야 합니다.\n"
+            "4. 플레이어들은 개인 카드 2장과 공유 카드로 높은 카드 조합을 만들어야 합니다.\n"
             "5. 배팅 여부를 정한 뒤, 모두가 동의했다면 4번째 공유 카드를 공개합니다. (turn)\n"
             "6. 똑같이 배팅 여부를 정한 뒤, 모두가 동의했다면 마지막 공유 카드를 공개합니다. (river)\n"
             "7. 모든 공유 카드가 공개됐다면, 플레이어들은 자신의 카드 조합을 공개해 승자를 정합니다.\n"
@@ -118,7 +118,7 @@ class Poker(commands.Cog):
                     await user.send(f"당신의 카드: {cards[0]}, {cards[1]}")
                 except:
                     await ctx.send(f"{user.name} 님에게 DM을 보낼 수 없습니다.")
-            await ctx.send("카드가 배분되었습니다! `-poker flop`, `turn`, `river` 명령어로 커뮤니티 카드를 공개하세요.")
+            await ctx.send("카드가 배분되었습니다! 코인 베팅을 시작해주세요.")
 
         elif action == "flop":
             game = self.games.get(channel_id)
@@ -127,7 +127,7 @@ class Poker(commands.Cog):
             if len(game.community_cards) >= 3:
                 return await ctx.send("이미 플랍이 공개되었습니다.")
             game.flop()
-            await ctx.send(f"🃏 플랍: {' | '.join(game.community_cards)}")
+            await ctx.send(f"🃏 공유 카드: {' | '.join(game.community_cards)}")
 
         elif action == "turn":
             game = self.games.get(channel_id)
@@ -136,7 +136,9 @@ class Poker(commands.Cog):
             if len(game.community_cards) >= 4:
                 return await ctx.send("턴은 이미 공개되었습니다.")
             game.turn()
-            await ctx.send(f"🃏 턴: {' | '.join(game.community_cards)}")
+            cards = game.community_cards[:-1] + [f"**{game.community_cards[-1]}**"]
+            await ctx.send(f"공유 카드: {' | '.join(cards)}")
+
 
         elif action == "river":
             game = self.games.get(channel_id)
@@ -145,9 +147,10 @@ class Poker(commands.Cog):
             if len(game.community_cards) == 5:
                 return await ctx.send("리버는 이미 공개되었습니다.")
             game.river()
-            await ctx.send(f"🃏 리버: {' | '.join(game.community_cards)}")
+            cards = game.community_cards[:-1] + [f"**{game.community_cards[-1]}**"]
+            await ctx.send(f"🃏 공유 카드: {' | '.join(cards)}")
 
-            await ctx.send("🪙 게임이 종료되었습니다. 참여해 주셔서 감사합니다!")
+            await ctx.send("🪙 모든 공유 카드가 공개되었습니다.")
             del self.games[channel_id]  # Clean up
         
         elif action == "end":

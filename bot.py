@@ -17,6 +17,7 @@ class MyBot(commands.Bot):
         # Load your dice cog
         await self.load_extension("cogs.dice")
         await self.load_extension("cogs.poker")
+        await self.load_extension("cogs.store")
 
 # Create an instance of the bot using your custom class
 bot = MyBot(command_prefix="-", intents=intents)
