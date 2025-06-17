@@ -6,6 +6,13 @@ import os
 COIN_FILE = 'data/coins.json'
 ITEM_FILE = 'data/inventory.json'
 
+def is_integer(n):
+    try:
+        int(n)
+        return True
+    except ValueError:
+        return False
+
 def load_json(path):
     if not os.path.exists(path):
         with open(path, "w") as f:
@@ -70,7 +77,7 @@ class Store(commands.Cog):
         coins = load_json(COIN_FILE)
 
         # case 1: "-코인 amt" --> give coins to the command user
-        if arg1 and arg1.isdigit():
+        if is_integer(arg1) and arg2 is None:
             amt = int(arg1)
             user_id = str(ctx.author.id)
             coins[user_id] = coins.get(user_id, 0) + amt
@@ -81,9 +88,7 @@ class Store(commands.Cog):
                 return await ctx.send(f"<@{user_id}>님의 잔액에서 {(amt * -1)} 코인이 차감되었습니다.")
 
         # case 2: "-코인 @user amt"
-        elif arg1 and arg2 and arg2.isdigit():
-            if len(ctx.message.mentions) == 0:
-                return await ctx.send("유효하지 않은 명령어입니다.")
+        elif len(ctx.message.mentions) > 0 and is_integer(arg2):
             member = ctx.message.mentions[0]
             amt = int(arg2)
             user_id = str(member.id)
