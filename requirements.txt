@@ -1,2 +1,2 @@
 discord.py
-poker
+git+https://github.com/HenryRLee/PokerHandEvaluator.git@develop

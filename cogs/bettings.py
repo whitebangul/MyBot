@@ -34,9 +34,14 @@ class Betting:
 
     
     def get_curr_player(self):
-        if not self.turn_order:
-            return None
-        return self.turn_order[self.current_turn]
+        n = len(self.turn_order)
+        for _ in range(n):
+            pid = self.turn_order[self.current_turn]
+            if self.player_states[pid]["in_game"]:
+                return pid
+            self.current_turn = (self.current_turn + 1) % n
+        return None  # No active players left
+
     
     def advance_turn(self):
         n = len(self.turn_order)
@@ -88,8 +93,10 @@ class Betting:
         return True, "콜을 선언했습니다."
 
     def raise_bet(self, pid, raise_amt):
+        if raise_amt <= 0:
+            return False, "레이즈 금액은 2 코인 이상이어야 합니다."
         coins = self.load_coins()
-        current = self.player_states[pid]["bet"]
+        current = self.player_states[pid]["round_bet"]
         to_call = self.current_bet - current
         total = to_call + raise_amt
         
@@ -99,12 +106,15 @@ class Betting:
         coins[str(pid)] -= total
         self.player_states[pid]["bet"] += total
         self.player_states[pid]["round_bet"] += total
-        self.current_bet += raise_amt
         self.pot += total
 
+        self.current_bet = self.player_states[pid]["round_bet"]
+
+        self.player_states[pid]["has_acted"] = True
+
         for other_pid in self.turn_order:
-            if self.player_states[other_pid]["in_game"]:
-                self.player_states[other_pid]["has_acted"] = (other_pid == pid)
+            if other_pid != pid and self.player_states[other_pid]["in_game"]:
+                self.player_states[other_pid]["has_acted"] = False
         
         self.save_coins(coins)
         return True, f"{raise_amt} 코인을 추가 베팅했습니다."
@@ -136,3 +146,9 @@ class Betting:
             "player_states": self.player_states,
             "current_turn": self.current_turn
         }
+    
+    def reset_betting_round(self):
+        self.current_turn = 0
+        for pid in self.turn_order:
+            self.player_states[pid]["has_acted"] = False
+            self.player_states[pid]["round_bet"] = 0

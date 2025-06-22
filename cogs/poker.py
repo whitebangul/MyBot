@@ -2,10 +2,9 @@ from discord.ext import commands
 import discord
 import random
 from .bettings import Betting
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from PokerHandEvaluator.python.phevaluator.evaluator import evaluate_cards
+
+from phevaluator.evaluator import evaluate_cards
+
 SUITS = ['♠', '♥', '♦', '♣']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 
@@ -94,22 +93,20 @@ class PokerGame:
     
     def evaluate_winner(self):
         if len(self.community_cards) < 5:
-            return [], "아직 게임이 끝나지 않았습니다."
+            return []
         best_score = None
         winners = []
         for pid, hole_cards in self.players.items():
             all_cards = hole_cards + self.community_cards
             converted = [convert_card(c) for c in all_cards]
-            score = evaluate_cards(converted)
-
-            if best_score is None or score > best_score:
+            score = evaluate_cards(*converted)
+            if best_score is None or score < best_score:
                 best_score = score
                 winners = [pid]
             elif score == best_score:
                 winners.append(pid)
-            
-        hand_type = score.name
-        return winners, hand_type
+        
+        return winners
         
 
 class Poker(commands.Cog):
@@ -179,6 +176,9 @@ class Poker(commands.Cog):
             curr_player = game.betting.get_curr_player()
             if curr_player != player_id:
                 return await ctx.send("당신의 차례가 아닙니다.")
+
+            is_first_turn = game.betting.current_turn == 0
+
             
             if action == "fold":
                 game.betting.fold(player_id)
@@ -202,6 +202,8 @@ class Poker(commands.Cog):
                     return
             
             elif action == "call":
+                if is_first_turn:
+                    return
                 success, msg = game.betting.call(player_id)
                 await ctx.send(f"<@{player_id}>: {msg}")
                 if success:
@@ -215,21 +217,28 @@ class Poker(commands.Cog):
                         await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
 
             elif action == "raise":
+                if is_first_turn:
+                    return
                 if amount is None:
                     return await ctx.send("사용법: `-poker raise <금액>`")
                 success, msg = game.betting.raise_bet(player_id, amount)
                 await ctx.send(f"<@{player_id}>: {msg}")
-                if success:
-                    game.betting.player_states[player_id]["has_acted"] = True
-                    if game.betting.all_called_or_folded():
-                        await ctx.send("베팅이 종료되었습니다.")
-                        await ctx.send("다음 공유 카드를 열어주세요.")
-                        return
-                    else:
-                        next_pid = game.betting.advance_turn()
-                        await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
+                if not success:
+                    return
+                game.betting.player_states[player_id]["has_acted"] = True
+
+                if game.betting.all_called_or_folded():
+                    await ctx.send("베팅이 종료되었습니다.")
+                    await ctx.send("다음 공유 카드를 열어주세요.")
+                else:
+                    next_pid = game.betting.advance_turn()
+                    await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
             
             elif action == "bet":
+                if not is_first_turn:
+                    return
+                if game.betting.current_bet > 0:
+                    return
                 if amount is None:
                     return await ctx.send("사용법: `-poker bet <금액>`")
                 success, msg = game.betting.bet(player_id, amount)
@@ -286,9 +295,7 @@ class Poker(commands.Cog):
             await ctx.send(f"🃏 공유 카드: {' | '.join(game.community_cards)}")
             # Reset for next betting round
             game.betting.current_turn = 0
-            for pid in game.betting.turn_order:
-                game.betting.player_states[pid]["has_acted"] = False
-                game.betting.player_states[pid]["round_bet"] = 0
+            game.betting.reset_round()
             next_pid = game.betting.get_curr_player()
             await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
 
@@ -306,9 +313,7 @@ class Poker(commands.Cog):
 
             # Reset for next betting round
             game.betting.current_turn = 0
-            for pid in game.betting.turn_order:
-                game.betting.player_states[pid]["has_acted"] = False
-                game.betting.player_states[pid]["round_bet"] = 0
+            game.betting.reset_round()
             next_pid = game.betting.get_curr_player()
             await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
 
@@ -325,10 +330,10 @@ class Poker(commands.Cog):
 
             # End of the game
             await ctx.send("🪙 모든 공유 카드가 공개되었습니다.")
-            winners, hand_type = game.evaluate_winner()
+            winners = game.evaluate_winner()
             if winners:
                 win_mentions = ", ".join(f"<@{w}>" for w in winners)
-                await ctx.send(f"🎉 승자: {win_mentions} with a **{hand_type}**!")
+                await ctx.send(f"{win_mentions} 님의 승리!")
                 pot_share = game.betting.pot // len(winners)
                 coins = game.betting.load_coins()
                 for w in winners:
