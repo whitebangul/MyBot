@@ -14,10 +14,11 @@ intents.message_content = True
 # Define your custom bot class
 class MyBot(commands.Bot):
     async def setup_hook(self):
-        # Load your dice cog
+        # Load your cogs
         await self.load_extension("cogs.dice")
         await self.load_extension("cogs.poker")
         await self.load_extension("cogs.store")
+        await self.load_extension("cogs.blackjack")
 
 # Create an instance of the bot using your custom class
 bot = MyBot(command_prefix="-", intents=intents)
