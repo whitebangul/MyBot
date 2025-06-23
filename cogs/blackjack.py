@@ -8,6 +8,15 @@ class BlackjackView(discord.ui.View):
         super().__init__()
         self.game = game
         self.pid = pid
+        self.message = None
+    
+    async def on_timeout(self):
+        self.disable_all_items()
+        if self.message:
+            try:
+                await self.message.edit(content="시간이 초과되어 게임이 종료되었습니다.", view=None)
+            except discord.NotFound:
+                pass
 
     async def interaction_check(self, interaction: discord.Interaction[discord.Client]) -> bool:
         if interaction.user.id != self.pid:
@@ -82,7 +91,7 @@ class BlackJack(commands.Cog):
             await ctx.send(msg)
             if success:
                 view = BlackjackView(game, pid)
-                await ctx.send(game.get_hands(), view=view)
+                view.message = await ctx.send(game.get_hands(), view=view)
         
         elif act == "hit":
             game = self.games.get(pid)
