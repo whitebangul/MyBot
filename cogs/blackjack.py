@@ -56,8 +56,6 @@ bj_rules = (
     "명령어:\n"
     "`-블랙잭 시작` 게임 시작\n"
     "`-블랙잭 베팅 <금액>` 베팅 (1~5 코인)\n"
-    "`-블랙잭 힛` 카드 추가\n"
-    "`-블랙잭 스탠드` 카드 공개\n"
     "`-블랙잭 규칙` 규칙 보기\n"
 )
 
@@ -75,7 +73,7 @@ class BlackJack(commands.Cog):
         
         elif act == "시작":
             self.games[pid] = BlackJackGame(pid)
-            await ctx.send("🃏 블랙잭 게임을 시작했습니다. `-blackjack bet <금액>` 으로 베팅해주세요.")
+            await ctx.send("🃏 블랙잭 게임을 시작했습니다. `-블랙잭 베팅 <금액>` 으로 베팅해주세요.")
             await ctx.send(self.games[pid].get_hands())
         
         elif act == "베팅":
