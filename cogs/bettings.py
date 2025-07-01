@@ -42,7 +42,6 @@ class Betting:
             self.current_turn = (self.current_turn + 1) % n
         return None  # No active players left
 
-    
     def advance_turn(self):
         n = len(self.turn_order)
 
@@ -89,35 +88,7 @@ class Betting:
         self.player_states[pid]["has_acted"] = True
         self.save_coins(coins)
 
-
         return True, "콜을 선언했습니다."
-
-    def raise_bet(self, pid, raise_amt):
-        if raise_amt <= 0:
-            return False, "레이즈 금액은 2 코인 이상이어야 합니다."
-        coins = self.load_coins()
-        current = self.player_states[pid]["round_bet"]
-        to_call = self.current_bet - current
-        total = to_call + raise_amt
-        
-        if coins.get(str(pid), 0) < total:
-            return False, "코인이 충분하지 않습니다."
-        
-        coins[str(pid)] -= total
-        self.player_states[pid]["bet"] += total
-        self.player_states[pid]["round_bet"] += total
-        self.pot += total
-
-        self.current_bet = self.player_states[pid]["round_bet"]
-
-        self.player_states[pid]["has_acted"] = True
-
-        for other_pid in self.turn_order:
-            if other_pid != pid and self.player_states[other_pid]["in_game"]:
-                self.player_states[other_pid]["has_acted"] = False
-        
-        self.save_coins(coins)
-        return True, f"{raise_amt} 코인을 추가 베팅했습니다."
     
     def all_called_or_folded(self):
         active = [pid for pid in self.turn_order if self.player_states[pid]["in_game"]]

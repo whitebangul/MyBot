@@ -1,5 +1,4 @@
 from discord.ext import commands
-from .bettings import Betting
 import discord
 from .blackjackgame import BlackJackGame
 
@@ -55,11 +54,11 @@ bj_rules = (
     "6. 비기면 코인을 돌려받고, 지면 코인을 잃습니다.\n"
     "\n"
     "명령어:\n"
-    "`-blackjack start` 게임 시작\n"
-    "`-blackjack bet <금액>` 베팅 (1~5 코인)\n"
-    "`-blackjack hit` 카드 추가\n"
-    "`-blackjack stand` 카드 공개\n"
-    "`-blackjack rules` 규칙 보기\n"
+    "`-블랙잭 시작` 게임 시작\n"
+    "`-블랙잭 베팅 <금액>` 베팅 (1~5 코인)\n"
+    "`-블랙잭 힛` 카드 추가\n"
+    "`-블랙잭 스탠드` 카드 공개\n"
+    "`-블랙잭 규칙` 규칙 보기\n"
 )
 
 class BlackJack(commands.Cog):
@@ -67,19 +66,19 @@ class BlackJack(commands.Cog):
         self.bot = bot
         self.games = {}  # user_id: BlackJackGame
     
-    @commands.command(name="blackjack")
+    @commands.command(name="블랙잭")
     async def blackjack(self, ctx, act: str = None, amt: int = None):
         pid = ctx.author.id
 
-        if act == "rules":
+        if act == "규칙":
             await ctx.send(bj_rules)
         
-        elif act == "start":
+        elif act == "시작":
             self.games[pid] = BlackJackGame(pid)
             await ctx.send("🃏 블랙잭 게임을 시작했습니다. `-blackjack bet <금액>` 으로 베팅해주세요.")
             await ctx.send(self.games[pid].get_hands())
         
-        elif act == "bet":
+        elif act == "베팅":
             game = self.games.get(pid)
             if not game:
                 return await ctx.send("게임을 먼저 시작해주세요. `-blackjack start`")
@@ -93,7 +92,7 @@ class BlackJack(commands.Cog):
                 view = BlackjackView(game, pid)
                 view.message = await ctx.send(game.get_hands(), view=view)
         
-        elif act == "hit":
+        elif act == "힛":
             game = self.games.get(pid)
             if not game:
                 return await ctx.send("게임을 먼저 시작해주세요. `-blackjack start`")
@@ -103,7 +102,7 @@ class BlackJack(commands.Cog):
             if result:
                 await ctx.send(f"{result}")
         
-        elif act == "stand":
+        elif act == "스탠드":
             game = self.games.get(pid)
             if not game:
                 return await ctx.send("게임을 먼저 시작해주세요. `-blackjack start`")
@@ -119,7 +118,7 @@ class BlackJack(commands.Cog):
             await ctx.send(game.get_hands())
         
         else:
-            await ctx.send("사용 가능한 명령어: `start`, `bet <금액>`, `hit`, `stand`, `status`, `rules`")
+            await ctx.send("알 수 없는 명령어입니다. `블랙잭 규칙`을 통해 사용 가능한 명령어를 확인하세요.")
 
 async def setup(bot):
     await bot.add_cog(BlackJack(bot))

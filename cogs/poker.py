@@ -15,22 +15,28 @@ rules_text = (
             "최고의 5장의 카드 조합을 만들어 승리하세요!\n"
             "\n"
             "**게임 명령어:**\n"
-            "1. `-poker start` 게임 시작\n"
-            "2. `-poker join` 플레이어 참가 (여러 명 가능)\n"
-            "3. `-poker deal` 각 플레이어에게 카드 2장씩 배분 (DM으로 전송됨)\n"
-            "4. `-poker flop` 공유 카드 3장 공개\n"
-            "5. `-poker turn` 공유 카드 1장 추가 공개\n"
-            "6. `-poker river` 마지막 공유 카드 1장 공개\n"
-            "7. `-poker end` 게임을 종료하기를 원하실 경우 언제든 종료할 수 있습니다.\n"
+            "1. `-텍사스 시작` 게임 시작\n"
+            "2. `-텍사스 참기` 플레이어 참가 (여러 명 가능)\n"
+            "3. `-텍사스 배분` 각 플레이어에게 카드 2장씩 배분 (DM으로 전송)\n"
+            "4. `-텍사스 플랍` 공유 카드 3장 공개\n"
+            "5. `-텍사스 턴` 공유 카드 1장 추가 공개\n"
+            "6. `-텍사스 리버` 마지막 공유 카드 1장 공개\n"
+            "7. `-텍사스 종료` 게임을 종료하기를 원하실 경우 언제든 종료할 수 있습니다.\n"
+            "8. `-텍사스 규칙` 텍사스 홀덤의 규칙을 확인합니다.\n"
+            "\n"
+            "**베팅 명령어:**\n"
+            "1. `-텍사스 베팅 <금액>` 베팅 라운드 시작 시 첫 플레이어의 베팅\n"
+            "2. `-텍사스 콜` 현재 베팅 액수에 응할\n"
+            "4. `-텍사스 폴드` 해당 라운드 포기\n"
             "\n"
             "게임 방법:\n"
             "\n"
-            "1. 모든 플레이어에게 개인 카드 2장이 주어집니다. (deal)\n"
+            "1. 모든 플레이어에게 개인 카드 2장이 주어집니다. (배분)\n"
             "2. 플레이어들은 카드 조합을 보고 베팅 여부를 정합니다. 각 플레이어들은 베팅, 레이즈, 콜, 폴드를 할 수 있습니다.\n"
-            "3. 모두가 동의했다면 공유 카드 3장을 공개합니다. (flop)\n"
+            "3. 모두가 동의했다면 공유 카드 3장을 공개합니다. (플랍)\n"
             "4. 플레이어들은 개인 카드 2장과 공유 카드로 높은 카드 조합을 만들어야 합니다.\n"
-            "5. 배팅 여부를 정한 뒤, 모두가 동의했다면 4번째 공유 카드를 공개합니다. (turn)\n"
-            "6. 똑같이 배팅 여부를 정한 뒤, 모두가 동의했다면 마지막 공유 카드를 공개합니다. (river)\n"
+            "5. 배팅 여부를 정한 뒤, 모두가 동의했다면 4번째 공유 카드를 공개합니다. (턴)\n"
+            "6. 똑같이 배팅 여부를 정한 뒤, 모두가 동의했다면 마지막 공유 카드를 공개합니다. (리버)\n"
             "7. 모든 공유 카드가 공개됐다면, 플레이어들은 자신의 카드 조합을 공개해 승자를 정합니다.\n"
             "\n"
             "**카드 조합 예시 (강한 순):**\n"
@@ -44,7 +50,7 @@ rules_text = (
             "5. 만일 누군가가 `레이즈`를 선언했다면, 이미 `콜`을 외친 플레이어들도 새로운 판돈에 `콜`로 응할지, `폴드`로 포기할지 선언합니다.\n"
             "6. 이 상태에서 `폴드`를 선언할 경우에도 이미 `콜`을 외치며 베팅한 코인은 돌려받을 수 없습니다.\n"
             "\n"
-            "게임 중 도움이 필요하면 언제든 `-poker rules`를 입력하세요!"
+            "게임 중 도움이 필요하면 언제든 `-포커 규칙`을 입력하세요!"
         )
 
 suit_map = {'♠': 's', '♥': 'h', '♦': 'd', '♣': 'c'}
@@ -115,17 +121,17 @@ class Poker(commands.Cog):
         self.bot = bot
         self.games = {} #channel_id: PokerGame
     
-    @commands.command(name="poker")
+    @commands.command(name="텍사스")
     async def poker_main(self, ctx, action: str, amount:int = None):
         channel_id = ctx.channel.id
 
-        if action == 'rules':
+        if action == '규칙':
             try:
                 await ctx.author.send(rules_text)
             except discord.Forbidden:
                 await ctx.send("❌ DM을 보낼 수 없습니다. DM을 허용해주세요.")
         
-        elif action == 'start':
+        elif action == '시작':
             if channel_id in self.games:
                 await ctx.send("이곳에서는 이미 게임이 진행 중입니다.")
                 return
@@ -133,7 +139,7 @@ class Poker(commands.Cog):
             self.games[channel_id] = PokerGame()
             await ctx.send("게임이 시작되었습니다! `-poker join`으로 참가하세요.")
 
-        elif action == 'join':
+        elif action == '참가':
             game = self.games.get(channel_id)
             if not game:
                 return await ctx.send("게임이 아직 시작되지 않았습니다. `-poker start`를 먼저 입력하세요.")
@@ -143,7 +149,7 @@ class Poker(commands.Cog):
             else:
                 await ctx.send("이미 참가중이거나 게임이 시작되었습니다.")
 
-        elif action == "deal":
+        elif action == "배분":
             game = self.games.get(channel_id)
             if not game:
                 return await ctx.send("진행 중인 게임이 없습니다.")
@@ -163,7 +169,7 @@ class Poker(commands.Cog):
             await ctx.send(f"<@{first_pid}> 님의 차례입니다. 베팅해주세요.")
 
 
-        elif action in ["bet", "call", "raise", "fold"]:
+        elif action in ["베팅", "콜", "폴드"]:
             game = self.games.get(channel_id)
             if not game or not game.started:
                 return await ctx.send("게임이 아직 시작되지 않았습니다.")
@@ -180,7 +186,7 @@ class Poker(commands.Cog):
             is_first_turn = game.betting.current_turn == 0
 
             
-            if action == "fold":
+            if action == "폴드":
                 game.betting.fold(player_id)
                 await ctx.send(f"<@{player_id}> 님이 폴드했습니다.")
                 if game.betting.only_one_left():
@@ -201,7 +207,7 @@ class Poker(commands.Cog):
                     del self.games[channel_id]
                     return
             
-            elif action == "call":
+            elif action == "콜":
                 if is_first_turn:
                     return
                 success, msg = game.betting.call(player_id)
@@ -214,27 +220,9 @@ class Poker(commands.Cog):
                         return
                     else:
                         next_pid = game.betting.advance_turn()
-                        await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
-
-            elif action == "raise":
-                if is_first_turn:
-                    return
-                if amount is None:
-                    return await ctx.send("사용법: `-poker raise <금액>`")
-                success, msg = game.betting.raise_bet(player_id, amount)
-                await ctx.send(f"<@{player_id}>: {msg}")
-                if not success:
-                    return
-                game.betting.player_states[player_id]["has_acted"] = True
-
-                if game.betting.all_called_or_folded():
-                    await ctx.send("베팅이 종료되었습니다.")
-                    await ctx.send("다음 공유 카드를 열어주세요.")
-                else:
-                    next_pid = game.betting.advance_turn()
-                    await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
+                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
             
-            elif action == "bet":
+            elif action == "베팅":
                 if not is_first_turn:
                     return
                 if game.betting.current_bet > 0:
@@ -251,7 +239,7 @@ class Poker(commands.Cog):
                         return
                     else:
                         next_pid = game.betting.advance_turn()
-                        await ctx.send(f"<@{next_pid}> 님의 차례입니다. 폴드, 콜, 레이즈 중 선택해주세요.")
+                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
         
         elif action == "status":
             game = self.games.get(channel_id)
@@ -283,7 +271,7 @@ class Poker(commands.Cog):
 
             await ctx.send("\n".join(status_lines))
         
-        elif action == "flop":
+        elif action == "플랍":
             game = self.games.get(channel_id)
             if not game or not game.started:
                 return await ctx.send("게임이 아직 시작되지 않았습니다.")
@@ -299,7 +287,7 @@ class Poker(commands.Cog):
             next_pid = game.betting.get_curr_player()
             await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
 
-        elif action == "turn":
+        elif action == "턴":
             game = self.games.get(channel_id)
             if not game or len(game.community_cards) < 3:
                 return await ctx.send("먼저 플랍을 공개하세요.")
@@ -318,7 +306,7 @@ class Poker(commands.Cog):
             await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
 
 
-        elif action == "river":
+        elif action == "리버":
             game = self.games.get(channel_id)
             if not game or len(game.community_cards) < 4:
                 return await ctx.send("먼저 턴을 공개하세요.")
@@ -344,7 +332,7 @@ class Poker(commands.Cog):
                 await ctx.send("⚠️ 승자를 판단할 수 없습니다.")
             del self.games[channel_id]
         
-        elif action == "end":
+        elif action == "종료":
             game = self.games.get(channel_id)
             if not game:
                 return await ctx.send("진행 중인 게임이 없습니다.")
@@ -354,7 +342,7 @@ class Poker(commands.Cog):
 
 
         else:
-            await ctx.send("알 수 없는 명령어입니다. 사용 가능한 명령어: `start`, `join`, `deal`, `flop`, `turn`, `river`")
+            await ctx.send("알 수 없는 명령어입니다. `텍사스 규칙`을 통해 사용 가능한 명령어를 확인하세요.")
 
 async def setup(bot):
     await bot.add_cog(Poker(bot))
