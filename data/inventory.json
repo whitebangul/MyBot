@@ -1,30 +1,6 @@
 {
-  "\uc18c\uc5fc\uc9c4\ud1b5\uc81c": {
+  "D-Serum (+5)": {
     "price": 1,
-    "stock": 4
-  },
-  "\uc624\ubc84\ub7ec\uc2dc": {
-    "price": 2,
-    "stock": 5
-  },
-  "\uc800\ud56d\uc8fc\uc0ac\uc81c": {
-    "price": 5,
-    "stock": 5
-  },
-  "\uba54\ubaa8\ub9ac\uce74\ub4dc": {
-    "price": 8,
-    "stock": 5
-  },
-  "\ud574\ud0b9 \uce74\ub4dc\ud0a4": {
-    "price": 8,
-    "stock": 5
-  },
-  "\uace0\uc8fc\ud30c \ubc1c\uc0dd\uae30": {
-    "price": 10,
-    "stock": 5
-  },
-  "\uc801\uc751 \ucd09\uc9c4\uc81c": {
-    "price": 15,
     "stock": 5
   }
 }
