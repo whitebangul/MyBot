@@ -308,15 +308,15 @@ class Poker(commands.Cog):
                     game.betting.save_coins(coins)
                 else:
                     await ctx.send("⚠️ 승자를 판단할 수 없습니다.")
-                del self.games[cid]
+                del self.games[channel_id]
                 return
 
             await ctx.send("💬 다음 베팅을 시작합니다.")
             await ctx.send(f"<@{game.betting.get_curr_player()}> 님의 차례입니다.")
 
         elif action == "종료":
-            if cid in self.games:
-                del self.games[cid]
+            if channel_id in self.games:
+                del self.games[channel_id]
                 await ctx.send("🚫 게임이 종료되었습니다.")
 
         else:
