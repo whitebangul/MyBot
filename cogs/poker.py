@@ -210,7 +210,39 @@ class Poker(commands.Cog):
             curr_player = game.betting.get_curr_player()
             if curr_player != player_id:
                 return await ctx.send("당신의 차례가 아닙니다.")
-
+            
+            elif action == "콜":
+                if is_first_turn:
+                    return
+                success, msg = game.betting.call(player_id)
+                await ctx.send(f"<@{player_id}>: {msg}")
+                if success:
+                    game.betting.player_states[player_id]["has_acted"] = True
+                    if game.betting.all_called_or_folded():
+                        await ctx.send("베팅이 종료되었습니다.")
+                        await ctx.send("다음 공유 카드를 열어주세요.")
+                        return
+                    else:
+                        next_pid = game.betting.advance_turn()
+                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
+            
+            elif action == "베팅":
+                if not is_first_turn:
+                    return
+                if game.betting.current_bet > 0:
+                    return
+                if amount is None:
+                    return await ctx.send("사용법: `-텍사스 베팅 <금액>`")
+                success, msg = game.betting.bet(player_id, amount)
+                await ctx.send(f"<@{player_id}>: {msg}")
+                if success:
+                    game.betting.player_states[player_id]["has_acted"] = True
+                    if game.betting.all_called_or_folded():
+                        await ctx.send("베팅이 종료되었습니다.")
+                        return
+                    else:
+                        next_pid = game.betting.advance_turn()
+                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
         
         elif action == "status":
             game = self.games.get(channel_id)
