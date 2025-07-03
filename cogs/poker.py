@@ -177,15 +177,9 @@ class Poker(commands.Cog):
             player_id = ctx.author.id
             if player_id not in game.players:
                 return await ctx.send("게임에 참가하지 않았습니다.")
-            
-            # turn check
-            curr_player = game.betting.get_curr_player()
-            if curr_player != player_id:
-                return await ctx.send("당신의 차례가 아닙니다.")
 
             is_first_turn = game.betting.current_turn == 0
 
-            
             if action == "폴드":
                 game.betting.fold(player_id)
                 await ctx.send(f"<@{player_id}> 님이 폴드했습니다.")
@@ -206,39 +200,17 @@ class Poker(commands.Cog):
                     await ctx.send(f"💰 <@{winner}> 님이 {game.betting.pot} 코인을 획득했습니다.")
                     del self.games[channel_id]
                     return
-            
-            elif action == "콜":
-                if is_first_turn:
-                    return
-                success, msg = game.betting.call(player_id)
-                await ctx.send(f"<@{player_id}>: {msg}")
-                if success:
-                    game.betting.player_states[player_id]["has_acted"] = True
-                    if game.betting.all_called_or_folded():
-                        await ctx.send("베팅이 종료되었습니다.")
-                        await ctx.send("다음 공유 카드를 열어주세요.")
-                        return
-                    else:
-                        next_pid = game.betting.advance_turn()
-                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
-            
-            elif action == "베팅":
-                if not is_first_turn:
-                    return
-                if game.betting.current_bet > 0:
-                    return
-                if amount is None:
-                    return await ctx.send("사용법: `-텍사스 베팅 <금액>`")
-                success, msg = game.betting.bet(player_id, amount)
-                await ctx.send(f"<@{player_id}>: {msg}")
-                if success:
-                    game.betting.player_states[player_id]["has_acted"] = True
-                    if game.betting.all_called_or_folded():
-                        await ctx.send("베팅이 종료되었습니다.")
-                        return
-                    else:
-                        next_pid = game.betting.advance_turn()
-                        await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
+                elif game.betting.get_curr_player() == player_id:
+                    # advance turn if folded player was the current turn
+                    next_pid = game.betting.advance_turn()
+                    await ctx.send(f"<@{next_pid}> 님의 차례입니다.")
+                return  # Early return for 폴드
+
+            # turn check only for 베팅 and 콜
+            curr_player = game.betting.get_curr_player()
+            if curr_player != player_id:
+                return await ctx.send("당신의 차례가 아닙니다.")
+
         
         elif action == "status":
             game = self.games.get(channel_id)
