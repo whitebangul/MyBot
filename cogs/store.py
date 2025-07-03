@@ -54,38 +54,38 @@ class Store(commands.Cog):
         bal = coins[user_id]
         await ctx.send(f"<@{user_id}> 님의 현재 잔액은 {bal} 코인입니다.")
     
-@commands.command(name="구매")
-async def buy(self, ctx, item_name: str, amt: int = 1):
-    coins = load_json(COIN_FILE)
-    items = load_json(ITEM_FILE)
-    user_id = str(ctx.author.id)
+    @commands.command(name="구매")
+    async def buy(self, ctx, item_name: str, amt: int = 1):
+        coins = load_json(COIN_FILE)
+        items = load_json(ITEM_FILE)
+        user_id = str(ctx.author.id)
 
-    # Normalize user input: lowercase + remove hyphens/spaces
-    normalized_name = item_name.lower().replace("-", "").replace(" ", "")
+        # Normalize user input: lowercase + remove hyphens/spaces
+        normalized_name = item_name.lower().replace("-", "").replace(" ", "")
 
-    # Translate alias to official name
-    official_name = ITEM_ALIASES.get(normalized_name, item_name)
+        # Translate alias to official name
+        official_name = ITEM_ALIASES.get(normalized_name, item_name)
 
-    if official_name not in items:
-        return await ctx.send("해당 상품이 존재하지 않습니다.")
-    if amt < 0:
-        return await ctx.send("유효하지 않은 요청입니다.")
+        if official_name not in items:
+            return await ctx.send("해당 상품이 존재하지 않습니다.")
+        if amt < 0:
+            return await ctx.send("유효하지 않은 요청입니다.")
 
-    item = items[official_name]
-    price, stock = item["price"], item["stock"]
-    total = price * amt
+        item = items[official_name]
+        price, stock = item["price"], item["stock"]
+        total = price * amt
 
-    if stock < amt:
-        return await ctx.send(f"현재 재고가 부족합니다. 남은 재고: {stock}")
-    if coins.get(user_id, 0) < total:
-        return await ctx.send(f"코인이 부족합니다. 총 가격: {total} 코인")
-    
-    coins[user_id] = coins.get(user_id, 0) - total
-    item["stock"] -= amt
+        if stock < amt:
+            return await ctx.send(f"현재 재고가 부족합니다. 남은 재고: {stock}")
+        if coins.get(user_id, 0) < total:
+            return await ctx.send(f"코인이 부족합니다. 총 가격: {total} 코인")
+        
+        coins[user_id] = coins.get(user_id, 0) - total
+        item["stock"] -= amt
 
-    save_json(COIN_FILE, coins)
-    save_json(ITEM_FILE, items)
-    await ctx.send(f"{official_name}을(를) {amt}개 구매했습니다.")
+        save_json(COIN_FILE, coins)
+        save_json(ITEM_FILE, items)
+        await ctx.send(f"{official_name}을(를) {amt}개 구매했습니다.")
 
 
     @commands.command(name="restock")
