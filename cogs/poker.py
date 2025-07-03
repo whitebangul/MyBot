@@ -16,7 +16,7 @@ rules_text = (
             "\n"
             "**게임 명령어:**\n"
             "1. `-텍사스 시작` 게임 시작\n"
-            "2. `-텍사스 참기` 플레이어 참가 (여러 명 가능)\n"
+            "2. `-텍사스 참가` 플레이어 참가 (여러 명 가능)\n"
             "3. `-텍사스 배분` 각 플레이어에게 카드 2장씩 배분 (DM으로 전송)\n"
             "4. `-텍사스 플랍` 공유 카드 3장 공개\n"
             "5. `-텍사스 턴` 공유 카드 1장 추가 공개\n"
@@ -50,7 +50,7 @@ rules_text = (
             "5. 만일 누군가가 `레이즈`를 선언했다면, 이미 `콜`을 외친 플레이어들도 새로운 판돈에 `콜`로 응할지, `폴드`로 포기할지 선언합니다.\n"
             "6. 이 상태에서 `폴드`를 선언할 경우에도 이미 `콜`을 외치며 베팅한 코인은 돌려받을 수 없습니다.\n"
             "\n"
-            "게임 중 도움이 필요하면 언제든 `-포커 규칙`을 입력하세요!"
+            "게임 중 도움이 필요하면 언제든 `-텍사스 규칙`을 입력하세요!"
         )
 
 suit_map = {'♠': 's', '♥': 'h', '♦': 'd', '♣': 'c'}
@@ -137,12 +137,12 @@ class Poker(commands.Cog):
                 return
             
             self.games[channel_id] = PokerGame()
-            await ctx.send("게임이 시작되었습니다! `-poker join`으로 참가하세요.")
+            await ctx.send("게임이 시작되었습니다! `-텍사스 참가`로 참가하세요.")
 
         elif action == '참가':
             game = self.games.get(channel_id)
             if not game:
-                return await ctx.send("게임이 아직 시작되지 않았습니다. `-poker start`를 먼저 입력하세요.")
+                return await ctx.send("게임이 아직 시작되지 않았습니다. `-텍사스 시작`을 먼저 입력하세요.")
             added = game.add_player(ctx.author)
             if added:
                 await ctx.send(f"<@{ctx.author.id}> 님이 게임에 참가했습니다.")
@@ -228,14 +228,13 @@ class Poker(commands.Cog):
                 if game.betting.current_bet > 0:
                     return
                 if amount is None:
-                    return await ctx.send("사용법: `-poker bet <금액>`")
+                    return await ctx.send("사용법: `-텍사스 베팅 <금액>`")
                 success, msg = game.betting.bet(player_id, amount)
                 await ctx.send(f"<@{player_id}>: {msg}")
                 if success:
                     game.betting.player_states[player_id]["has_acted"] = True
                     if game.betting.all_called_or_folded():
                         await ctx.send("베팅이 종료되었습니다.")
-                        await ctx.send("다음 공유 카드를 열어주세요.")
                         return
                     else:
                         next_pid = game.betting.advance_turn()
@@ -271,78 +270,57 @@ class Poker(commands.Cog):
 
             await ctx.send("\n".join(status_lines))
         
-        elif action == "플랍":
-            game = self.games.get(channel_id)
+        elif action in ["플랍", "턴", "리버"]:
             if not game or not game.started:
                 return await ctx.send("게임이 아직 시작되지 않았습니다.")
-            if len(game.community_cards) >= 3:
-                return await ctx.send("이미 플랍이 공개되었습니다.")
             if not game.betting.all_called_or_folded():
                 return await ctx.send("아직 베팅이 끝나지 않았습니다.")
-            game.flop()
-            await ctx.send(f"🃏 공유 카드: {' | '.join(game.community_cards)}")
-            # Reset for next betting round
-            game.betting.current_turn = 0
-            game.betting.reset_round()
-            next_pid = game.betting.get_curr_player()
-            await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
 
-        elif action == "턴":
-            game = self.games.get(channel_id)
-            if not game or len(game.community_cards) < 3:
-                return await ctx.send("먼저 플랍을 공개하세요.")
-            if len(game.community_cards) >= 4:
-                return await ctx.send("턴은 이미 공개되었습니다.")
-            if not game.betting.all_called_or_folded():
-                return await ctx.send("아직 베팅이 끝나지 않았습니다.")
-            game.turn()
-            cards = game.community_cards[:-1] + [f"***{game.community_cards[-1]}***"]
-            await ctx.send(f"공유 카드: {' | '.join(cards)}")
+            if action == "플랍":
+                if len(game.community_cards) >= 3:
+                    return await ctx.send("이미 플랍이 공개되었습니다.")
+                game.flop()
+            elif action == "턴":
+                if len(game.community_cards) < 3:
+                    return await ctx.send("먼저 플랍을 공개하세요.")
+                if len(game.community_cards) >= 4:
+                    return await ctx.send("턴은 이미 공개되었습니다.")
+                game.turn()
+            elif action == "리버":
+                if len(game.community_cards) < 4:
+                    return await ctx.send("먼저 턴을 공개하세요.")
+                if len(game.community_cards) == 5:
+                    return await ctx.send("리버는 이미 공개되었습니다.")
+                game.river()
 
-            # Reset for next betting round
-            game.betting.current_turn = 0
-            game.betting.reset_round()
-            next_pid = game.betting.get_curr_player()
-            await ctx.send(f"<@{next_pid}> 님의 차례입니다. 베팅해주세요.")
-
-
-        elif action == "리버":
-            game = self.games.get(channel_id)
-            if not game or len(game.community_cards) < 4:
-                return await ctx.send("먼저 턴을 공개하세요.")
-            if len(game.community_cards) == 5:
-                return await ctx.send("리버는 이미 공개되었습니다.")
-            game.river()
             cards = game.community_cards[:-1] + [f"***{game.community_cards[-1]}***"]
             await ctx.send(f"🃏 공유 카드: {' | '.join(cards)}")
 
-            # End of the game
-            await ctx.send("🪙 모든 공유 카드가 공개되었습니다.")
-            winners = game.evaluate_winner()
-            if winners:
-                win_mentions = ", ".join(f"<@{w}>" for w in winners)
-                await ctx.send(f"{win_mentions} 님의 승리!")
-                pot_share = game.betting.pot // len(winners)
-                coins = game.betting.load_coins()
-                for w in winners:
-                    coins[str(w)] += pot_share
-                    await ctx.send(f"<@{w}> 님이 {pot_share} 코인을 획득했습니다.")
-                game.betting.save_coins(coins)
-            else:
-                await ctx.send("⚠️ 승자를 판단할 수 없습니다.")
-            del self.games[channel_id]
-        
-        elif action == "종료":
-            game = self.games.get(channel_id)
-            if not game:
-                return await ctx.send("진행 중인 게임이 없습니다.")
-            
-            del self.games[channel_id]
-            await ctx.send(f"<@{ctx.author.id}> 님의 요청으로 게임이 종료되었습니다.")
+            if len(game.community_cards) == 5:
+                await ctx.send("🪙 모든 공유 카드가 공개되었습니다.")
+                winners = game.evaluate_winner()
+                if winners:
+                    coins = game.betting.load_coins()
+                    share = game.betting.pot // len(winners)
+                    for w in winners:
+                        coins[str(w)] += share
+                        await ctx.send(f"🏆 <@{w}> 님이 {share} 코인을 획득했습니다.")
+                    game.betting.save_coins(coins)
+                else:
+                    await ctx.send("⚠️ 승자를 판단할 수 없습니다.")
+                del self.games[cid]
+                return
 
+            await ctx.send("💬 다음 베팅을 시작합니다.")
+            await ctx.send(f"<@{game.betting.get_curr_player()}> 님의 차례입니다.")
+
+        elif action == "종료":
+            if cid in self.games:
+                del self.games[cid]
+                await ctx.send("🚫 게임이 종료되었습니다.")
 
         else:
-            await ctx.send("알 수 없는 명령어입니다. `텍사스 규칙`을 통해 사용 가능한 명령어를 확인하세요.")
+            await ctx.send("❓ 알 수 없는 명령어입니다. `-텍사스 규칙`을 참고하세요.")
 
 async def setup(bot):
     await bot.add_cog(Poker(bot))
