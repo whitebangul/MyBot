@@ -91,11 +91,18 @@ class Store(commands.Cog):
     @commands.command(name="restock")
     async def restock(self, ctx, item_name: str, amt: int):
         items = load_json(ITEM_FILE)
-        if item_name not in items:
+        aliases = load_aliases()
+
+        # Normalize input
+        normalized = item_name.lower().replace("-", "").replace(" ", "")
+        official_name = aliases.get(normalized, item_name)
+
+        if official_name not in items:
             return await ctx.send("해당 상품이 존재하지 않습니다.")
-        items[item_name]["stock"] += amt
+        
+        items[official_name]["stock"] += amt
         save_json(ITEM_FILE, items)
-        await ctx.send(f"{item_name}의 재고가 {amt}개 추가되었습니다.")
+        await ctx.send(f"{official_name}의 재고가 {amt}개 추가되었습니다.")
 
     @commands.command(name="코인")
     async def change_coins(self, ctx, arg1=None, arg2=None):
