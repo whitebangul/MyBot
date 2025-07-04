@@ -95,7 +95,7 @@ class Store(commands.Cog):
 
         # Normalize input
         normalized = item_name.lower().replace("-", "").replace(" ", "")
-        official_name = aliases.get(normalized, item_name)
+        official_name = ITEM_ALIASES.get(normalized, item_name)
 
         if official_name not in items:
             return await ctx.send("해당 상품이 존재하지 않습니다.")
