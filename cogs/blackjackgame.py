@@ -35,7 +35,7 @@ class BlackJackGame:
                 value += int(rank)
         while value > 21 and num_aces:
             value -= 10
-            aces -= 1
+            num_aces -= 1
         return value
     
     def get_player_value(self):
@@ -83,6 +83,9 @@ class BlackJackGame:
 
         if player > 21:
             self.result = f"**버스트! 당신의 패배입니다.** `(-{self.bet} 코인)`"
+        elif self.check_initial_blackjack() and dealer != 21:
+            coins[pid] += int(self.bet * 2.5)
+            self.result = f"**블랙잭!** `(+{int(self.bet * 2.5)})` 코인"
         elif dealer > 21 or player > dealer:
             coins[pid] += self.bet * 2
             self.result = f"**당신의 승리입니다.** `(+{self.bet * 2} 코인)`"
@@ -110,3 +113,6 @@ class BlackJackGame:
             f"**도박꾼의 카드:** {dealer_display} "
             f"{'(총합: ' + str(self.get_dealer_value()) + ')' if reveal_dealer or self.game_over else ''}"
         )
+
+    def check_initial_blackjack(self):
+        return self.get_player_value() == 21 and len(self.player_hand) == 2

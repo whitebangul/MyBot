@@ -87,8 +87,15 @@ class BlackJack(commands.Cog):
             success, msg = game.place_bet(amt)
             await ctx.send(msg)
             if success:
-                view = BlackjackView(game, pid)
-                view.message = await ctx.send(game.get_hands(), view=view)
+                # 🎯 Check if the player got 21 right after betting
+                if game.check_initial_blackjack():
+                    game.game_over = True
+                    result = game.end_game()
+                    await ctx.send(game.get_hands(reveal_dealer=True))
+                    await ctx.send(f"**블랙잭!** {result}")
+                else:
+                    view = BlackjackView(game, pid)
+                    view.message = await ctx.send(game.get_hands(), view=view)
         
         elif act == "힛":
             game = self.games.get(pid)
