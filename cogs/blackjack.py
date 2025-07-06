@@ -10,6 +10,8 @@ class BlackjackView(discord.ui.View):
         self.message = None
     
     async def on_timeout(self):
+        if self.game.is_game_over():
+            return
         self.disable_all_items()
         if self.message:
             try:
@@ -30,6 +32,7 @@ class BlackjackView(discord.ui.View):
         if result:
             msg += f"\n {result}"
             self.disable_all_items()
+            self.stop()
         await interaction.response.edit_message(content=msg, view=self if not self.game.is_game_over() else None)
     
     @discord.ui.button(label="스탠드", style=discord.ButtonStyle.red)
@@ -38,6 +41,7 @@ class BlackjackView(discord.ui.View):
         msg = self.game.get_hands(reveal_dealer = True)
         msg += f"\n {result}"
         self.disable_all_items()
+        self.stop()
         await interaction.response.edit_message(content=msg, view=None)
     
     def disable_all_items(self):
