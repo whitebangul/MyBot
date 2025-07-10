@@ -1,7 +1,13 @@
 from discord.ext import commands
-import discord
 import json
 import os
+import re
+
+def normalize_name(name):
+    # Remove text in parentheses, hyphens, and spaces
+    name = re.sub(r"\(.*?\)", "", name)
+    name = name.lower().replace("-", "").replace(" ", "")
+    return name
 
 ITEM_ALIASES = {
     "d-serum": "D-Serum (+5)",
@@ -55,16 +61,36 @@ class Store(commands.Cog):
         await ctx.send(f"<@{user_id}> 님의 현재 잔액은 {bal} 코인입니다.")
     
     @commands.command(name="구매")
-    async def buy(self, ctx, item_name: str, amt: int = 1):
+    async def buy(self, ctx, *args):
+        if not args:
+            return await ctx.send("구매할 아이템 이름을 입력해주세요.")
+
+        if args[-1].isdigit():
+            amt = int(args[-1])
+            item_name = " ".join(args[:-1])
+        else:
+            amt = 1
+            item_name = " ".join(args)
+
         coins = load_json(COIN_FILE)
         items = load_json(ITEM_FILE)
         user_id = str(ctx.author.id)
 
-        # Normalize user input: lowercase + remove hyphens/spaces
-        normalized_name = item_name.lower().replace("-", "").replace(" ", "")
+        normalized_name = normalize_name(item_name)
+        official_name = None
 
-        # Translate alias to official name
-        official_name = ITEM_ALIASES.get(normalized_name, item_name)
+        # First check aliases
+        if normalized_name in ITEM_ALIASES:
+            official_name = ITEM_ALIASES[normalized_name]
+        else:
+            # Then try to find a match in inventory by ignoring parentheses
+            for name in items.keys():
+                if normalize_name(name) == normalized_name:
+                    official_name = name
+                    break
+
+        if official_name is None:
+            return await ctx.send("해당 상품이 존재하지 않습니다.")
 
         if official_name not in items:
             return await ctx.send("해당 상품이 존재하지 않습니다.")
@@ -79,7 +105,7 @@ class Store(commands.Cog):
             return await ctx.send(f"현재 재고가 부족합니다. 남은 재고: {stock}")
         if coins.get(user_id, 0) < total:
             return await ctx.send(f"코인이 부족합니다. 총 가격: {total} 코인")
-        
+
         coins[user_id] = coins.get(user_id, 0) - total
         item["stock"] -= amt
 
@@ -87,19 +113,31 @@ class Store(commands.Cog):
         save_json(ITEM_FILE, items)
         await ctx.send(f"{official_name}을(를) {amt}개 구매했습니다.")
 
-
     @commands.command(name="restock")
-    async def restock(self, ctx, item_name: str, amt: int):
+    async def restock(self, ctx, *args):
+        if len(args) < 2 or not args[-1].isdigit():
+            return await ctx.send("사용법: `-restock 아이템이름 수량`")
+
+        amt = int(args[-1])
+        item_name = " ".join(args[:-1])
+
         items = load_json(ITEM_FILE)
         aliases = load_aliases()
 
-        # Normalize input
-        normalized = item_name.lower().replace("-", "").replace(" ", "")
-        official_name = ITEM_ALIASES.get(normalized, item_name)
+        normalized = normalize_name(item_name)
+        official_name = None
 
-        if official_name not in items:
+        if normalized in ITEM_ALIASES:
+            official_name = ITEM_ALIASES[normalized]
+        else:
+            for name in items.keys():
+                if normalize_name(name) == normalized:
+                    official_name = name
+                    break
+
+        if official_name is None:
             return await ctx.send("해당 상품이 존재하지 않습니다.")
-        
+
         items[official_name]["stock"] += amt
         save_json(ITEM_FILE, items)
         await ctx.send(f"{official_name}의 재고가 {amt}개 추가되었습니다.")
